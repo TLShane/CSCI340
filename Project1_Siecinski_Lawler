@@ -1,7 +1,7 @@
 /*
  ============================================================================
  Name        : test.c
- Author      : 
+ Author      :
  Version     :
  Copyright   : Your copyright notice
  Description : Hello World in C, Ansi-style
@@ -11,7 +11,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
-struct process{
+#include <string.h>
+struct Process{
 	int pid;
 	int ppid;
 	int cid[100];
@@ -19,6 +20,7 @@ struct process{
 	int vsize;
 	char comm[20];
 };
+
 
 int main(void) {
 	struct dirent *de;
@@ -33,10 +35,14 @@ int main(void) {
 	}
 	int pid;
 	char pname[50];
-	int pidlist[10000];
+	int indentarray[100];
+	indentarray[0] = 0;
+	int indent = 0;
 	int ppid;
 	int vmsize;
 	char cha1;
+	int prevpid = 0;
+	int lastindentup = 1;
 	FILE *fp;
 	while ((de = readdir(dr)) != NULL)
 	{
@@ -46,24 +52,34 @@ int main(void) {
 		strcat(init, "/proc/");
 		strcat(init, (de->d_name));
 		strcat(init, "/stat");
-		printf("%s\n", init);
 		fp = fopen(init, "r");
-		if(fp == NULL)
-		{
-			printf("could not find stat file\n");
-		}
+		if(fp == NULL){}
 		else
 		{
 			fscanf(fp, "%d %s %c %d %d %d %d %d %d", &pid, &pname, &cha1, &ppid, &vmsize,&vmsize,&vmsize,&vmsize,&vmsize);
-			/*fscanf(fp, "%s", &pname);
-			fscanf(fp, "%s", &cha1);
-			fscanf(fp, "%d", &ppid);
-			fscanf(fp, "%d %d %d %d %d", &vmsize,&vmsize,&vmsize,&vmsize,&vmsize);
-			*/
+
+			if(prevpid==ppid&&ppid!=2){
+                indent++;
+                indentarray[lastindentup]=ppid;
+                lastindentup++;
+			}
+			else if(ppid<indentarray[lastindentup-1]){
+                int n = 0;
+                for(n;indentarray[n]==ppid;n++){}
+                for(int d = 0;d<lastindentup-n-1;d++){
+                    lastindentup--;
+                    indent--;
+                }
+            }
+            int i = 0;
+            for(i;i<indent;i++){
+                printf("-");
+            }
 			printf("%d %s %d %d\n", pid, pname, ppid, vmsize);
+			prevpid = pid;
 
 
-		}
+	}
 	}
 
 	closedir(dr);
