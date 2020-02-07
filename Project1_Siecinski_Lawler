@@ -1,10 +1,10 @@
 /*
  ============================================================================
- Name        : test.c
- Author      :
+ Name        : csci_proj1.c
+ Author      : Tristan Lawler and Jared Siecinski
  Version     :
  Copyright   : Your copyright notice
- Description : Hello World in C, Ansi-style
+ Description : Print all processes currently running in tree format
  ============================================================================
  */
 
@@ -13,11 +13,11 @@
 #include <dirent.h>
 #include <string.h>
 
-
-int main(void) {
-	for(int j= 1; j<3 ; j++)
-	{
-		printf("J: %d\n ", j);
+//recursive function that takes a process pid and an indent amount, prints out the process with said pid,
+//and looks through all other processes, recursively calling the function for all children of the process
+//
+//the method of reading the proc files is the same as in the main
+int printProc(int currParent, int indent) {
 	struct dirent *de;
 
 	DIR *dr = opendir("/proc");
@@ -30,14 +30,10 @@ int main(void) {
 	}
 	int pid;
 	char pname[50];
-	int indentarray[100];
-	indentarray[0] = 0;
-	int indent = 0;
 	int ppid;
 	int vmsize;
 	char cha1;
 	int prevpid = 0;
-	int lastindent = 0;
 	FILE *fp;
 	while ((de = readdir(dr)) != NULL)
 	{
@@ -52,95 +48,75 @@ int main(void) {
 		else
 		{
 			fscanf(fp, "%d %s %c %d %d %d %d %d %d", &pid, &pname, &cha1, &ppid, &vmsize,&vmsize,&vmsize,&vmsize,&vmsize);
-			if(ppid == j || ppid == prevpid)
-			{
-			if(pid == j && ppid == 0){
-			}
-
-			else if(prevpid==ppid){
-                indent++;
-                lastindent++;
-                indentarray[lastindent]=ppid;
-			}
-			else if(ppid<indentarray[lastindent]){
-                int n = 0;
-                for(n;indentarray[n]==ppid;n++){}
-                for(int d = 0;d<lastindent-n;d++){
-                    lastindent--;
-                    indent--;
+            fclose(fp);
+			if(ppid == currParent){
+                int i;
+                for(i=0;i<indent;i++){
+                    printf("-");
                 }
-            }
-            int i = 0;
-            for(i;i<indent;i++){
-                printf("-");
-            }
-			printf("%d %s %d %d kb\n", pid, pname, ppid, vmsize);
-			prevpid = pid;
+                printf("%d %s %d kb\n", pid, pname, vmsize);
+                printProc(pid, indent+1);
 			}
-
-
 	}
 	}
+	return 0;
+}
 
-	closedir(dr);
-	}
+
+int main(void) {
 	struct dirent *de;
 
+        //open directory to the /proc folder
 		DIR *dr = opendir("/proc");
 
+        //if the proc folder doesn't then end the program
 		if (dr == NULL)
 		{
 			printf("Couldn't open directory");
 			return 0;
 
 		}
+
+		//various variables
 		int pid;
 		char pname[50];
-		int indentarray[100];
-		indentarray[0] = 0;
-		int indent = 0;
 		int ppid;
 		int vmsize;
 		char cha1;
 		int prevpid = 0;
-		int lastindent = 0;
 		FILE *fp;
+
+		//read all of the process stat files
 		while ((de = readdir(dr)) != NULL)
 		{
+
+            //create the file path string
 			char init [200];
 			memset(init, NULL, 199);
 			de-> d_name;
 			strcat(init, "/proc/");
 			strcat(init, (de->d_name));
 			strcat(init, "/stat");
+
+			//open file
 			fp = fopen(init, "r");
+
+
 			if(fp == NULL){}
 			else
 			{
-				fscanf(fp, "%d %s %c %d %d %d %d %d %d", &pid, &pname, &cha1, &ppid, &vmsize,&vmsize,&vmsize,&vmsize,&vmsize);
-				if(prevpid==ppid){
-	                indent++;
-	                lastindent++;
-	                indentarray[lastindent]=ppid;
-				}
-				else if(ppid<indentarray[lastindent]){
-	                int n = 0;
-	                for(n;indentarray[n]==ppid;n++){}
-	                for(int d = 0;d<lastindent-n;d++){
-	                    lastindent--;
-	                    indent--;
-	                }
-	            }
-	            int i = 0;
-	            for(i;i<indent;i++){
-	                printf("-");
-	            }
-				printf("%d %s %d %d kb\n", pid, pname, ppid, vmsize);
-				prevpid = pid;
-				}
 
+                //read the file and strore the info in the corresponding variables
+				fscanf(fp, "%d %s %c %d %d %d %d %d %d", &pid, &pname, &cha1, &ppid, &vmsize,&vmsize,&vmsize,&vmsize,&vmsize);
+				//need to close the file before going into the function so the function can reopen the file
+                fclose(fp);
+				if(ppid==0 && *pname != NULL){
+                    printf("%d %s %d kb\n", pid, pname, vmsize);
+                    printProc(pid,1);
+				}
 
 		}
-		closedir(dr);
-	return 0;
+}
+closedir(dr);
+return 0;
 }
