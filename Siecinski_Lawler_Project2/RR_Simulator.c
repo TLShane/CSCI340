@@ -4,13 +4,13 @@
 
 // structure to hold job information
 struct Job {
-    int runtime;
-    int time_left;
-    bool complete;
-    int memory;
-    bool allocated;
-    int start_time;
-    int time_complete;
+    int runtime;        // variable to store how long it takes to complete job
+    int time_left;      // variable to store how much time is left on a job
+    bool complete;      // boolean variable to mark if job is complete for removal
+    int memory;         // variable to store how much memory the job takes up
+    bool allocated;     // boolean variable to tell wether or not job is allocated to page table
+    int start_time;     // variable to store start time
+    int time_complete;  // variable to store end time
 };
 
 
@@ -18,7 +18,7 @@ struct Job {
 //used to ensure there is no skew in the random numbers generated
 int rand_lim(int limit) {
 
-    int divisor = RAND_MAX/(limit+1);
+    int divisor = RAND_MAX/(limit+1);       
     int retval;
 
     do {
