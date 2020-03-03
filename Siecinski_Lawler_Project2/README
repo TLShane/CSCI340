@@ -1,0 +1,6 @@
+How to use the program:
+Usage: ./RR_Simulator.out {Memory Size} {Page Size} {Number of Jobs} {Minimum Runtime} {Maximum Runtime} {Minimum Job Memory} {Maximum Job Memory}
+
+How to set a seed for the random number generator:
+With each new terminal window you must use the command "export RANDOM_SEED"
+After which you can set the seed by using the command "RANDOM_SEED={Number}" in the terminal
